@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Now</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/book">Book Now</a>
+        <a href="/about">About Us</a>
+        <a href="/contact">Contact Us</a>
+    </nav>
+</header>
+<div class="bg">
+    <div class="container">
+        <h2>Book Your Tour Now</h2>
+        <form method="POST" action="/submit">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="text" name="mobile" placeholder="Mobile Number" required>
+            <input type="date" name="arrival" required>
+            <input type="date" name="departure" required>
+            <input type="number" name="persons" placeholder="No. of Persons" required>
+            <input type="number" name="children" placeholder="No. of Children">
+            <textarea name="message" placeholder="Message"></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
