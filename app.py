@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
 
 def init_db():
