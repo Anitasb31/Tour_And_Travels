@@ -1,32 +1,15 @@
-from flask import Flask, render_template, request, redirect, session, url_for
-import sqlite3
+from flask import Flask, render_template, request, redirect, session
+import psycopg2
+import os
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # use a strong one in production
+app.secret_key = 'your-secret-key'  # change this in production
 
-
-# ---------- DB INIT ----------
-def init_db():
-    conn = sqlite3.connect('tours.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS bookings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        mobile TEXT,
-        arrival TEXT,
-        departure TEXT,
-        persons INTEGER,
-        children INTEGER,
-        message TEXT
-    )''')
-    conn.commit()
-    conn.close()
-
-init_db()
-
+# ---------- PostgreSQL Connection ----------
+def get_db_connection():
+    return psycopg2.connect(os.environ['DATABASE_URL'])
 
 # ---------- Public Routes ----------
-
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -54,19 +37,17 @@ def submit():
         request.form['children'],
         request.form['message']
     )
-    conn = sqlite3.connect('tours.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('''
         INSERT INTO bookings (name, mobile, arrival, departure, persons, children, message)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
     ''', data)
     conn.commit()
     conn.close()
     return redirect('/')
 
-
-# ---------- Admin Area ----------
-
+# ---------- Admin Routes ----------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -81,7 +62,7 @@ def login():
 def admin():
     if not session.get('admin'):
         return redirect('/login')
-    conn = sqlite3.connect('tours.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM bookings ORDER BY id DESC')
     bookings = c.fetchall()
@@ -94,6 +75,8 @@ def logout():
     return redirect('/')
 
 
+
 # ---------- Run App ----------
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
