@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
-import os
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
+app.secret_key = 'your-secret-key'  # use a strong one in production
 
+
+# ---------- DB INIT ----------
 def init_db():
     conn = sqlite3.connect('tours.db')
     c = conn.cursor()
@@ -23,48 +24,8 @@ def init_db():
 
 init_db()
 
-@app.route('/')
-def home():
-    return render_template('home.html')
 
-@app.route('/book')
-def book():
-    return render_template('book.html')
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    data = (
-        request.form['name'],
-        request.form['mobile'],
-        request.form['arrival'],
-        request.form['departure'],
-        request.form['persons'],
-        request.form['children'],
-        request.form['message']
-    )
-    conn = sqlite3.connect('tours.db')
-    c = conn.cursor()
-    c.execute('''
-        INSERT INTO bookings (name, mobile, arrival, departure, persons, children, message)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', data)
-    conn.commit()
-    conn.close()
-    return redirect('/')
-
-from flask import Flask, render_template, request, redirect, session, url_for
-import sqlite3
-
-app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # use a strong one in production
+# ---------- Public Routes ----------
 
 @app.route('/')
 def home():
@@ -102,6 +63,7 @@ def submit():
     conn.commit()
     conn.close()
     return redirect('/')
+
 
 # ---------- Admin Area ----------
 
@@ -132,24 +94,6 @@ def logout():
     return redirect('/')
 
 
-
+# ---------- Run App ----------
 if __name__ == '__main__':
     app.run(debug=True)
-
-with open(os.path.join(base_dir, "app.py"), "w") as f:
-    f.write(app_py)
-
-with open(os.path.join(template_dir, "home.html"), "w") as f:
-    f.write(home_html)
-
-with open(os.path.join(template_dir, "about.html"), "w") as f:
-    f.write(about_html)
-
-with open(os.path.join(template_dir, "contact.html"), "w") as f:
-    f.write(contact_html)
-
-with open(os.path.join(static_dir, "style.css"), "w") as f:
-    f.write(style_css)
-
-shutil.make_archive(base_dir, 'zip', base_dir)
-"/mnt/data/simple_travel_site.zip"
